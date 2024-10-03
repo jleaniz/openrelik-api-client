@@ -13,8 +13,7 @@ This Python package provides a simple API client (`APIClient`) that automaticall
    ```
 
 **Example:**
-    ```python
-    
+   ```python
     import os
     from openrelik_api_client import APIClient
 
@@ -30,7 +29,8 @@ This Python package provides a simple API client (`APIClient`) that automaticall
     # Example GET request
     response = api_client.get("/users/me/")
     print(response.json())
-    ```
+```
+
 
 **How it works:**
 
