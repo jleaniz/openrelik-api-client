@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "openrelik-api-client"
+version = "2024.10.03"
+description = "API client that automatically handles token refresh"
+authors = ["Johan Berggren <jberggren@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+requests = "^2.32.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
