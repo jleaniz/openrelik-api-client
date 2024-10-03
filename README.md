@@ -14,6 +14,7 @@ This Python package provides a simple API client (`APIClient`) that automaticall
 
 **Example:**
     ```python
+    
     import os
     from openrelik_api_client import APIClient
 
