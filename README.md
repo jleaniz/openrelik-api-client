@@ -15,7 +15,7 @@ This Python package provides a simple API client (`APIClient`) that automaticall
 **Example:**
    ```python
     import os
-    from openrelik_api_client import APIClient
+    from openrelik_api_client.api_client import APIClient
 
     # Initialize the API client
     api_server_url = "http://localhost:8710"
