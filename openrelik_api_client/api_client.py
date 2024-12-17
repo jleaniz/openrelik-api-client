@@ -115,11 +115,11 @@ class APIClient:
                     {"file": (file_path.name, chunk,
                               "application/octet-stream")}
                 )
-                headers = {"Content-Type": m.content_type}
+                headers = {"Content-Type": encoder.content_type}
                 response = self.session.post(
                     f"{self.base_url}{endpoint}",
                     headers=headers,
-                    data=m.to_string(),
+                    data=encoder.to_string(),
                     params=params,
                 )
                 if response.status_code == 200:
