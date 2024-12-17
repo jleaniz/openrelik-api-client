@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+
 from openrelik_api_client.api_client import APIClient
 
 
@@ -111,7 +113,10 @@ class WorkflowsAPI(APIClient):
         """
         endpoint = f"{
             self.base_url}/folders/{folder_id}/workflows/{workflow_id}/run"
-        response = self.session.post(endpoint)
+        workflow = self.get_workflow(folder_id, workflow_id)
+        spec = json.loads(workflow.get('spec_json'))
+        data = {'workflow_spec': spec}
+        response = self.session.post(endpoint, json=data)
         if response.status_code == 200:
             workflow = response.json()
             return workflow
