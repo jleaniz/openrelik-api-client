@@ -104,6 +104,7 @@ class WorkflowsAPI(APIClient):
         endpoint = f"{
             self.base_url}/folders/{folder_id}/workflows/{workflow_id}"
         response = self.session.delete(endpoint)
+        response.raise_for_status()
         return response.status_code == 204
 
     def run_workflow(self, folder_id: int, workflow_id: int):

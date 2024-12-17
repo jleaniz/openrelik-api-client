@@ -30,7 +30,7 @@ class FoldersAPI(APIClient):
             int: Folder ID for the new root folder, or -1 otherwise.
 
         Raises:
-            RuntimeError: If the API request failed.
+            HTTPError: If the API request failed.
         """
         folder_id = -1
         self.endpoint = f"{self.base_url}/folders/"
@@ -52,7 +52,7 @@ class FoldersAPI(APIClient):
             int: Folder ID for the new root folder, or -1 otherwise.
 
         Raises:
-            RuntimeError: If the API request failed.
+            HTTPError: If the API request failed.
         """
         folder_id = -1
         endpoint = f"{self.base_url}/folders/{folder_id}/folders"
@@ -73,8 +73,9 @@ class FoldersAPI(APIClient):
             True if the folder exists, False otherwise.
 
         Raises:
-            RuntimeError: If the API request failed.
+            HTTPError: If the API request failed.
         """
         endpoint = f"{self.base_url}/folders/{folder_id}"
         response = self.session.get(endpoint)
+        response.raise_for_status()
         return response.status_code == 200
