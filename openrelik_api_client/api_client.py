@@ -11,13 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from uuid import uuid4
-from pathlib import Path
+
 import math
-import os
 import requests
+
+from pathlib import Path
 from requests.exceptions import RequestException
 from requests_toolbelt import MultipartEncoder
+from uuid import uuid4
 
 
 class APIClient:
