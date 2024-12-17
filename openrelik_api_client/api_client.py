@@ -18,14 +18,6 @@ import os
 from pathlib import Path
 from uuid import uuid4
 import math
-<< << << < HEAD
-
-== == == =
->>>>>> > ba40633(Updates)
-
-<< << << < HEAD
-== == == =
->>>>>> > ba40633(Updates)
 
 
 class APIClient:
