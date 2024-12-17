@@ -11,15 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import math
-import requests
-
-from pathlib import Path
-
-from pathlib import Path
-from requests.exceptions import RequestException
 from requests_toolbelt import MultipartEncoder
+from requests.exceptions import RequestException
+import requests
+import os
+from pathlib import Path
+from uuid import uuid4
+import math
+<< << << < HEAD
+
+== == == =
+>>>>>> > ba40633(Updates)
+
+<< << << < HEAD
+== == == =
+>>>>>> > ba40633(Updates)
 
 
 class APIClient:
@@ -112,15 +118,15 @@ class APIClient:
                     "resumableFilename": resumableFilename,
                     "folder_id": str(folder_id),
                 }
-                m = MultipartEncoder(
+                encoder = MultipartEncoder(
                     {"file": (file_path.name, chunk,
                               "application/octet-stream")}
                 )
-                headers = {"Content-Type": m.content_type}
+                headers = {"Content-Type": encoder.content_type}
                 response = self.session.post(
                     f"{self.base_url}{endpoint}",
                     headers=headers,
-                    data=m.to_string(),
+                    data=encoder.to_string(),
                     params=params,
                 )
                 if response.status_code == 200:
