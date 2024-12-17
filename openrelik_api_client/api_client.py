@@ -111,7 +111,7 @@ class APIClient:
                     "resumableFilename": resumableFilename,
                     "folder_id": str(folder_id),
                 }
-                m = MultipartEncoder(
+                encoder = MultipartEncoder(
                     {"file": (file_path.name, chunk,
                               "application/octet-stream")}
                 )
