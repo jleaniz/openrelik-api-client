@@ -30,15 +30,20 @@ class WorkflowsAPI(APIClient):
             template_id: The ID of the workflow template to use.
 
         Returns:
-            The ID of the created workflow.
+            The ID of the created workflow. -1 otherwise
+
+        Raises:
+            HTTPError: If the API request failed.
         """
+        workflow_id = -1
         endpoint = f"{self.base_url}/folders/{folder_id}/workflows/"
         data = {"folder_id": folder_id,
                 "file_ids": file_ids, "template_id": template_id}
         response = self.session.post(endpoint, json=data)
+        response.raise_for_status()
         if response.status_code == 200:
-            return response.json().get("id")
-        raise RuntimeError("Error creating workflow.")
+            workflow_id = response.json().get("id")
+        return workflow_id
 
     def get_workflow(self, folder_id: int, workflow_id: int):
         """Retrieves a workflow by ID.
@@ -49,10 +54,14 @@ class WorkflowsAPI(APIClient):
 
         Returns:
             The workflow data.
+
+         Raises:
+            HTTPError: If the API request failed.
         """
         endpoint = f"{
             self.base_url}/folders/{folder_id}/workflows/{workflow_id}"
         response = self.session.get(endpoint)
+        response.raise_for_status()
         if response.status_code == 200:
             return response.json()
 
@@ -65,19 +74,19 @@ class WorkflowsAPI(APIClient):
             workflow_data: The updated workflow data.
 
         Returns:
-            The updated workflow data.
+            The updated workflow data, or None.
 
         Raises:
-            RuntimeError: If the API request failed.
+            HTTPError: If the API request failed.
         """
+        workflow = None
         endpoint = f"{
             self.base_url}/folders/{folder_id}/workflows/{workflow_id}"
         response = self.session.patch(endpoint, json=workflow_data)
+        response.raise_for_status()
         if response.status_code == 200:
             workflow = response.json()
-            return workflow
-        else:
-            raise RuntimeError("Error updating workflow.")
+        return workflow
 
     def delete_workflow(self, folder_id, workflow_id) -> bool:
         """Deletes a workflow.
@@ -90,7 +99,7 @@ class WorkflowsAPI(APIClient):
             True if the request was successful.
 
         Raises:
-            RuntimeError: If the API request failed.
+            HTTPError: If the API request failed.
         """
         endpoint = f"{
             self.base_url}/folders/{folder_id}/workflows/{workflow_id}"
@@ -109,16 +118,16 @@ class WorkflowsAPI(APIClient):
             A workflow object.
 
         Raises:
-            RuntimeError: If the API request failed.
+            HTTPError: If the API request failed.
         """
+        workflow = None
         endpoint = f"{
             self.base_url}/folders/{folder_id}/workflows/{workflow_id}/run/"
         workflow = self.get_workflow(folder_id, workflow_id)
         spec = json.loads(workflow.get('spec_json'))
         data = {'workflow_spec': spec}
         response = self.session.post(endpoint, json=data)
+        response.raise_for_status()
         if response.status_code == 200:
             workflow = response.json()
-            return workflow
-        else:
-            raise RuntimeError("Error running workflow.")
+        return workflow

@@ -27,18 +27,19 @@ class FoldersAPI(APIClient):
             display_name (str): Folder display name.
 
         Returns:
-            int: Folder ID for the new root folder.
+            int: Folder ID for the new root folder, or -1 otherwise.
 
         Raises:
             RuntimeError: If the API request failed.
         """
+        folder_id = -1
         self.endpoint = f"{self.base_url}/folders/"
         params = {"display_name": display_name}
         response = self.session.post(self.endpoint, json=params)
+        response.raise_for_status()
         if response.status_code == 201:
-            return response.json().get('id')
-        else:
-            raise RuntimeError("Error creating root folder.")
+            folder_id = response.json().get('id')
+        return folder_id
 
     def create_subfolder(self, folder_id: int, display_name: str) -> int:
         """Create a subfolder within the given folder ID.
@@ -48,18 +49,19 @@ class FoldersAPI(APIClient):
             display_name: The name of the subfolder to check.
 
         Returns:
-            True if the subfolder exists, False otherwise.
+            int: Folder ID for the new root folder, or -1 otherwise.
 
         Raises:
             RuntimeError: If the API request failed.
         """
+        folder_id = -1
         endpoint = f"{self.base_url}/folders/{folder_id}/folders"
         data = {"display_name": display_name}
         response = self.session.post(endpoint, json=data)
+        response.raise_for_status()
         if response.status_code == 201:
-            return response.json().get("id")
-        else:
-            raise RuntimeError("Error creating subfolder.")
+            folder_id = response.json().get("id")
+        return folder_id
 
     def folder_exists(self, folder_id: int) -> bool:
         """Checks if a folder with the given ID exists.
