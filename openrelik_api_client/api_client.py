@@ -11,14 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from uuid import uuid4
+from pathlib import Path
 import math
+import os
 import requests
 
 from pathlib import Path
 from requests.exceptions import RequestException
-from requests_toolbelt import MultipartEncoder
-from uuid import uuid4
 
 
 class APIClient:
@@ -85,7 +85,7 @@ class APIClient:
             FileNotFoundError: if file_path is not found.
         """
         endpoint = "/files/upload"
-        chunk_size = 1024000  # 1 MB
+        chunk_size = 1024 * 1024  # 1 MB
         resumableTotalChunks = 0
         resumableChunkNumber = 0
         resumableIdentifier = uuid4().hex
@@ -111,15 +111,15 @@ class APIClient:
                     "resumableFilename": resumableFilename,
                     "folder_id": str(folder_id),
                 }
-                encoder = MultipartEncoder(
+                m = MultipartEncoder(
                     {"file": (file_path.name, chunk,
                               "application/octet-stream")}
                 )
-                headers = {"Content-Type": encoder.content_type}
+                headers = {"Content-Type": m.content_type}
                 response = self.session.post(
                     f"{self.base_url}{endpoint}",
                     headers=headers,
-                    data=encoder.to_string(),
+                    data=m.to_string(),
                     params=params,
                 )
                 if response.status_code == 200:
