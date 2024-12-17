@@ -85,7 +85,7 @@ class APIClient:
             FileNotFoundError: if file_path is not found.
         """
         endpoint = "/files/upload"
-        chunk_size = 1024 * 1024  # 1 MB
+        chunk_size = 1024000  # 1 MB
         resumableTotalChunks = 0
         resumableChunkNumber = 0
         resumableIdentifier = uuid4().hex
