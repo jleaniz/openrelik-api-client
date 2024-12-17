@@ -32,7 +32,7 @@ class WorkflowsAPI(APIClient):
         Returns:
             The ID of the created workflow.
         """
-        endpoint = f"{self.base_url}/folders/{folder_id}/workflows"
+        endpoint = f"{self.base_url}/folders/{folder_id}/workflows/"
         data = {"folder_id": folder_id,
                 "file_ids": file_ids, "template_id": template_id}
         response = self.session.post(endpoint, json=data)
@@ -112,7 +112,7 @@ class WorkflowsAPI(APIClient):
             RuntimeError: If the API request failed.
         """
         endpoint = f"{
-            self.base_url}/folders/{folder_id}/workflows/{workflow_id}/run"
+            self.base_url}/folders/{folder_id}/workflows/{workflow_id}/run/"
         workflow = self.get_workflow(folder_id, workflow_id)
         spec = json.loads(workflow.get('spec_json'))
         data = {'workflow_spec': spec}
