@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from api_client import APIClient
+from openrelik_api_client.api_client import APIClient
 
 
 class FoldersAPI(APIClient):

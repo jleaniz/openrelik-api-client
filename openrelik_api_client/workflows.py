@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from api_client import APIClient
+from openrelik_api_client.api_client import APIClient
 
 
 class WorkflowsAPI(APIClient):
@@ -31,23 +31,25 @@ class WorkflowsAPI(APIClient):
             The ID of the created workflow.
         """
         endpoint = f"{self.base_url}/folders/{folder_id}/workflows"
-        data = {"file_ids": file_ids, "template_id": template_id}
+        data = {"folder_id": folder_id,
+                "file_ids": file_ids, "template_id": template_id}
         response = self.session.post(endpoint, json=data)
-        if response.status_code == 201:
+        if response.status_code == 200:
             return response.json().get("id")
         raise RuntimeError("Error creating workflow.")
 
-    def get_workflow(self, workflow_id: int):
+    def get_workflow(self, folder_id: int, workflow_id: int):
         """Retrieves a workflow by ID.
 
         Args:
+            folder_id: The ID of the folder where the workflow exists.
             workflow_id: The ID of the workflow to retrieve.
 
         Returns:
             The workflow data.
         """
-
-        endpoint = f"{self.base_url}/folders/workflows/{workflow_id}"
+        endpoint = f"{
+            self.base_url}/folders/{folder_id}/workflows/{workflow_id}"
         response = self.session.get(endpoint)
         if response.status_code == 200:
             return response.json()
@@ -59,10 +61,10 @@ class WorkflowsAPI(APIClient):
             folder_id: The ID of the folder containing the workflow.
             workflow_id: The ID of the workflow to update.
             workflow_data: The updated workflow data.
-            
+
         Returns:
             The updated workflow data.
-            
+
         Raises:
             RuntimeError: If the API request failed.
         """
