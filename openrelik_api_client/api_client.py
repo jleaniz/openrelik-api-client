@@ -12,8 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import math
 import requests
+
+from pathlib import Path
 from requests.exceptions import RequestException
+from requests_toolbelt import MultipartEncoder
+from uuid import uuid4
 
 
 class APIClient:
@@ -65,6 +70,60 @@ class APIClient:
         """Sends a DELETE request to the specified API endpoint."""
         url = f"{self.base_url}{endpoint}"
         return self.session.delete(url, **kwargs)
+
+    def upload_file(self, file_path: str, folder_id: int) -> bool:
+        """Uploads a file to the server.
+
+        Args:
+            file_path: File contents.
+            folder_id: An existing OpenRelik folder identifier.
+
+        Returns:
+            True if the upload was successful.
+
+        Raise:
+            FileNotFoundError: if file_path is not found.
+        """
+        endpoint = "/files/upload"
+        chunk_size = 1024000  # 1 MB
+        resumableTotalChunks = 0
+        resumableChunkNumber = 0
+        resumableIdentifier = uuid4().hex
+        file_path = Path(file_path)
+        resumableFilename = file_path.name
+        if not file_path.exists():
+            raise FileNotFoundError(f"File {file_path} not found.")
+
+        if folder_id:
+            response = self.session.get(f"{self.base_url}/folders/{folder_id}")
+            if response.status_code == 404:
+                return False
+
+        with open(file_path, "rb") as fh:
+            total_size = Path(file_path).stat().st_size
+            resumableTotalChunks = math.ceil(total_size / chunk_size)
+            while chunk := fh.read(chunk_size):
+                resumableChunkNumber += 1
+                params = {
+                    "resumableChunkNumber": str(resumableChunkNumber),
+                    "resumableTotalChunks": str(resumableTotalChunks),
+                    "resumableIdentifier": resumableIdentifier,
+                    "resumableFilename": resumableFilename,
+                    "folder_id": str(folder_id),
+                }
+                encoder = MultipartEncoder(
+                    {"file": (file_path.name, chunk,
+                              "application/octet-stream")}
+                )
+                headers = {"Content-Type": encoder.content_type}
+                response = self.session.post(
+                    f"{self.base_url}{endpoint}",
+                    headers=headers,
+                    data=encoder.to_string(),
+                    params=params,
+                )
+                if response.status_code == 200:
+                    return True
 
 
 class TokenRefreshSession(requests.Session):
