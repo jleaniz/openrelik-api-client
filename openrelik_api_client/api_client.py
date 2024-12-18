@@ -85,6 +85,7 @@ class APIClient:
             FileNotFoundError: if file_path is not found.
         """
         file_id = -1
+        response = None
         endpoint = "/files/upload"
         chunk_size = 1024000  # 1 MB
         resumableTotalChunks = 0
@@ -123,8 +124,8 @@ class APIClient:
                     data=encoder.to_string(),
                     params=params,
                 )
-                if response.status_code == 201:
-                    file_id = response.json().get('id')
+            if response and response.status_code == 201:
+                file_id = response.json().get('id')
         return file_id
 
 
