@@ -17,9 +17,10 @@ import json
 from openrelik_api_client.api_client import APIClient
 
 
-class WorkflowsAPI(APIClient):
-    def __init__(self, api_server, api_key):
-        super().__init__(api_server, api_key)
+class WorkflowsAPI:
+    def __init__(self, api_client: APIClient):
+        super().__init__()
+        self.api_client = api_client
 
     def create_workflow(self, folder_id: int, file_ids: list, template_id: int = None) -> int:
         """Creates a new workflow.
@@ -36,10 +37,10 @@ class WorkflowsAPI(APIClient):
             HTTPError: If the API request failed.
         """
         workflow_id = -1
-        endpoint = f"{self.base_url}/folders/{folder_id}/workflows/"
+        endpoint = f"{self.api_client.base_url}/folders/{folder_id}/workflows/"
         data = {"folder_id": folder_id,
                 "file_ids": file_ids, "template_id": template_id}
-        response = self.session.post(endpoint, json=data)
+        response = self.api_client.session.post(endpoint, json=data)
         response.raise_for_status()
         if response.status_code == 200:
             workflow_id = response.json().get("id")
@@ -59,8 +60,8 @@ class WorkflowsAPI(APIClient):
             HTTPError: If the API request failed.
         """
         endpoint = f"{
-            self.base_url}/folders/{folder_id}/workflows/{workflow_id}"
-        response = self.session.get(endpoint)
+            self.api_client.base_url}/folders/{folder_id}/workflows/{workflow_id}"
+        response = self.api_client.session.get(endpoint)
         response.raise_for_status()
         if response.status_code == 200:
             return response.json()
@@ -81,8 +82,8 @@ class WorkflowsAPI(APIClient):
         """
         workflow = None
         endpoint = f"{
-            self.base_url}/folders/{folder_id}/workflows/{workflow_id}"
-        response = self.session.patch(endpoint, json=workflow_data)
+            self.api_client.base_url}/folders/{folder_id}/workflows/{workflow_id}"
+        response = self.api_client.session.patch(endpoint, json=workflow_data)
         response.raise_for_status()
         if response.status_code == 200:
             workflow = response.json()
@@ -102,8 +103,8 @@ class WorkflowsAPI(APIClient):
             HTTPError: If the API request failed.
         """
         endpoint = f"{
-            self.base_url}/folders/{folder_id}/workflows/{workflow_id}"
-        response = self.session.delete(endpoint)
+            self.api_client.base_url}/folders/{folder_id}/workflows/{workflow_id}"
+        response = self.api_client.session.delete(endpoint)
         response.raise_for_status()
         return response.status_code == 204
 
@@ -123,11 +124,11 @@ class WorkflowsAPI(APIClient):
         """
         workflow = None
         endpoint = f"{
-            self.base_url}/folders/{folder_id}/workflows/{workflow_id}/run/"
+            self.api_client.base_url}/folders/{folder_id}/workflows/{workflow_id}/run/"
         workflow = self.get_workflow(folder_id, workflow_id)
         spec = json.loads(workflow.get('spec_json'))
         data = {'workflow_spec': spec}
-        response = self.session.post(endpoint, json=data)
+        response = self.api_client.session.post(endpoint, json=data)
         response.raise_for_status()
         if response.status_code == 200:
             workflow = response.json()

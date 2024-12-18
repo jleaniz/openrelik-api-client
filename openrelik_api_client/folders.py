@@ -15,10 +15,11 @@
 from openrelik_api_client.api_client import APIClient
 
 
-class FoldersAPI(APIClient):
+class FoldersAPI:
 
-    def __init__(self, api_server, api_key):
-        super().__init__(api_server, api_key)
+    def __init__(self, api_client: APIClient):
+        super().__init__()
+        self.api_client = api_client
 
     def create_root_folder(self, display_name: str) -> int:
         """Create a root folder.
@@ -33,9 +34,9 @@ class FoldersAPI(APIClient):
             HTTPError: If the API request failed.
         """
         folder_id = -1
-        self.endpoint = f"{self.base_url}/folders/"
+        endpoint = f"{self.api_client.base_url}/folders/"
         params = {"display_name": display_name}
-        response = self.session.post(self.endpoint, json=params)
+        response = self.api_client.session.post(endpoint, json=params)
         response.raise_for_status()
         if response.status_code == 201:
             folder_id = response.json().get('id')
@@ -55,9 +56,9 @@ class FoldersAPI(APIClient):
             HTTPError: If the API request failed.
         """
         folder_id = -1
-        endpoint = f"{self.base_url}/folders/{folder_id}/folders"
+        endpoint = f"{self.api_client.base_url}/folders/{folder_id}/folders"
         data = {"display_name": display_name}
-        response = self.session.post(endpoint, json=data)
+        response = self.api_client.session.post(endpoint, json=data)
         response.raise_for_status()
         if response.status_code == 201:
             folder_id = response.json().get("id")
@@ -75,7 +76,7 @@ class FoldersAPI(APIClient):
         Raises:
             HTTPError: If the API request failed.
         """
-        endpoint = f"{self.base_url}/folders/{folder_id}"
-        response = self.session.get(endpoint)
+        endpoint = f"{self.api_client.base_url}/folders/{folder_id}"
+        response = self.api_client.session.get(endpoint)
         response.raise_for_status()
         return response.status_code == 200
