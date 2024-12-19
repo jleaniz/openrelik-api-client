@@ -21,19 +21,19 @@ class FoldersAPI:
         super().__init__()
         self.api_client = api_client
 
-    def create_root_folder(self, display_name: str) -> int:
+    def create_root_folder(self, display_name: str) -> int | None:
         """Create a root folder.
 
         Args:
             display_name (str): Folder display name.
 
         Returns:
-            int: Folder ID for the new root folder, or -1 otherwise.
+            int: Folder ID for the new root folder, or None otherwise.
 
         Raises:
             HTTPError: If the API request failed.
         """
-        folder_id = -1
+        folder_id = None
         endpoint = f"{self.api_client.base_url}/folders/"
         params = {"display_name": display_name}
         response = self.api_client.session.post(endpoint, json=params)
@@ -42,7 +42,8 @@ class FoldersAPI:
             folder_id = response.json().get('id')
         return folder_id
 
-    def create_subfolder(self, folder_id: int, display_name: str) -> int:
+    def create_subfolder(
+            self, folder_id: int, display_name: str) -> int | None:
         """Create a subfolder within the given folder ID.
 
         Args:
@@ -50,12 +51,12 @@ class FoldersAPI:
             display_name: The name of the subfolder to check.
 
         Returns:
-            int: Folder ID for the new root folder, or -1 otherwise.
+            int: Folder ID for the new root folder, or None.
 
         Raises:
             HTTPError: If the API request failed.
         """
-        folder_id = -1
+        folder_id = None
         endpoint = f"{self.api_client.base_url}/folders/{folder_id}/folders"
         data = {"display_name": display_name}
         response = self.api_client.session.post(endpoint, json=data)
