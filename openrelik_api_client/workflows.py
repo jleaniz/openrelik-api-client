@@ -21,6 +21,7 @@ class WorkflowsAPI:
     def __init__(self, api_client: APIClient):
         super().__init__()
         self.api_client = api_client
+        self.folders_url = f"{self.api_client.base_url}/folders"
 
     def create_workflow(
             self, folder_id: int, file_ids: list, template_id: int = None) -> int | None:
@@ -38,7 +39,7 @@ class WorkflowsAPI:
             HTTPError: If the API request failed.
         """
         workflow_id = None
-        endpoint = f"{self.api_client.base_url}/folders/{folder_id}/workflows/"
+        endpoint = f"{self.folders_url}/{folder_id}/workflows/"
         data = {"folder_id": folder_id,
                 "file_ids": file_ids, "template_id": template_id}
         response = self.api_client.session.post(endpoint, json=data)
@@ -60,8 +61,7 @@ class WorkflowsAPI:
          Raises:
             HTTPError: If the API request failed.
         """
-        endpoint = f"{
-            self.api_client.base_url}/folders/{folder_id}/workflows/{workflow_id}"
+        endpoint = f"{self.folders_url}/{folder_id}/workflows/{workflow_id}"
         response = self.api_client.session.get(endpoint)
         response.raise_for_status()
         if response.status_code == 200:
@@ -82,8 +82,7 @@ class WorkflowsAPI:
             HTTPError: If the API request failed.
         """
         workflow = None
-        endpoint = f"{
-            self.api_client.base_url}/folders/{folder_id}/workflows/{workflow_id}"
+        endpoint = f"{self.folders_url}/{folder_id}/workflows/{workflow_id}"
         response = self.api_client.session.patch(endpoint, json=workflow_data)
         response.raise_for_status()
         if response.status_code == 200:
@@ -103,8 +102,7 @@ class WorkflowsAPI:
         Raises:
             HTTPError: If the API request failed.
         """
-        endpoint = f"{
-            self.api_client.base_url}/folders/{folder_id}/workflows/{workflow_id}"
+        endpoint = f"{self.folders_url}/{folder_id}/workflows/{workflow_id}"
         response = self.api_client.session.delete(endpoint)
         response.raise_for_status()
         return response.status_code == 204
@@ -124,8 +122,8 @@ class WorkflowsAPI:
             HTTPError: If the API request failed.
         """
         workflow = None
-        endpoint = f"{
-            self.api_client.base_url}/folders/{folder_id}/workflows/{workflow_id}/run/"
+        endpoint = (
+            f"{self.folders_url}/{folder_id}/workflows/{workflow_id}/run/")
         workflow = self.get_workflow(folder_id, workflow_id)
         spec = json.loads(workflow.get('spec_json'))
         data = {'workflow_spec': spec}
