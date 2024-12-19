@@ -71,7 +71,8 @@ class APIClient:
         url = f"{self.base_url}{endpoint}"
         return self.session.delete(url, **kwargs)
 
-    def upload_file(self, file_path: str, folder_id: int) -> int:
+    def upload_file(
+        self, file_path: str, folder_id: int) -> int | None:
         """Uploads a file to the server.
 
         Args:
@@ -79,12 +80,12 @@ class APIClient:
             folder_id: An existing OpenRelik folder identifier.
 
         Returns:
-            file_id of the uploaded file or -1 otherwise.
+            file_id of the uploaded file or None otherwise.
 
         Raise:
             FileNotFoundError: if file_path is not found.
         """
-        file_id = -1
+        file_id = None
         response = None
         endpoint = "/files/upload"
         chunk_size = 1024000  # 1 MB
