@@ -22,7 +22,8 @@ class WorkflowsAPI:
         super().__init__()
         self.api_client = api_client
 
-    def create_workflow(self, folder_id: int, file_ids: list, template_id: int = None) -> int:
+    def create_workflow(
+            self, folder_id: int, file_ids: list, template_id: int = None) -> int | None:
         """Creates a new workflow.
 
         Args:
@@ -31,12 +32,12 @@ class WorkflowsAPI:
             template_id: The ID of the workflow template to use.
 
         Returns:
-            The ID of the created workflow. -1 otherwise
+            The ID of the created workflow. None otherwise
 
         Raises:
             HTTPError: If the API request failed.
         """
-        workflow_id = -1
+        workflow_id = None
         endpoint = f"{self.api_client.base_url}/folders/{folder_id}/workflows/"
         data = {"folder_id": folder_id,
                 "file_ids": file_ids, "template_id": template_id}
