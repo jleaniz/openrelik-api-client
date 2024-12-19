@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import math
-import requests
-
-from pathlib import Path
-from requests.exceptions import RequestException
 from requests_toolbelt import MultipartEncoder
+from requests.exceptions import RequestException
+import requests
+import os
+from pathlib import Path
 from uuid import uuid4
+import math
 
 
 class APIClient:
@@ -71,7 +71,8 @@ class APIClient:
         url = f"{self.base_url}{endpoint}"
         return self.session.delete(url, **kwargs)
 
-    def upload_file(self, file_path: str, folder_id: int) -> bool:
+    def upload_file(
+        self, file_path: str, folder_id: int) -> int | None:
         """Uploads a file to the server.
 
         Args:
@@ -79,11 +80,13 @@ class APIClient:
             folder_id: An existing OpenRelik folder identifier.
 
         Returns:
-            True if the upload was successful.
+            file_id of the uploaded file or None otherwise.
 
         Raise:
             FileNotFoundError: if file_path is not found.
         """
+        file_id = None
+        response = None
         endpoint = "/files/upload"
         chunk_size = 1024000  # 1 MB
         resumableTotalChunks = 0
@@ -97,7 +100,7 @@ class APIClient:
         if folder_id:
             response = self.session.get(f"{self.base_url}/folders/{folder_id}")
             if response.status_code == 404:
-                return False
+                return file_id
 
         with open(file_path, "rb") as fh:
             total_size = Path(file_path).stat().st_size
@@ -122,8 +125,9 @@ class APIClient:
                     data=encoder.to_string(),
                     params=params,
                 )
-                if response.status_code == 200:
-                    return True
+            if response and response.status_code == 201:
+                file_id = response.json().get('id')
+        return file_id
 
 
 class TokenRefreshSession(requests.Session):
