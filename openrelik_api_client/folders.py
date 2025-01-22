@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Any
+
 from openrelik_api_client.api_client import APIClient
 
 
@@ -81,3 +83,26 @@ class FoldersAPI:
         response = self.api_client.session.get(endpoint)
         response.raise_for_status()
         return response.status_code == 200
+
+    def update_folder(
+        self, folder_id: int, folder_data: dict[str, Any]
+    ):
+        """Updates an existing folder.
+
+        Args:
+            folder_id: The ID of the folder to update.
+            folder_data: The updated folder data.
+
+        Returns:
+            The updated folder data, or None.
+
+        Raises:
+            HTTPError: If the API request failed.
+        """
+        endpoint = f"{self.api_client.base_url}/folders/{folder_id}"
+        response = self.api_client.session.patch(
+            endpoint,
+            json=folder_data
+        )
+        response.raise_for_status()
+        return response.json()

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import tempfile
 from requests_toolbelt import MultipartEncoder
 from requests.exceptions import RequestException
 import requests
@@ -70,6 +71,26 @@ class APIClient:
         """Sends a DELETE request to the specified API endpoint."""
         url = f"{self.base_url}{endpoint}"
         return self.session.delete(url, **kwargs)
+
+    def download_file(self, file_id: int, filename: str) -> str | None:
+        """Downloads a file from OpenRelik.
+
+        Args:
+            file_id: The ID of the file to download.
+            filename: The name of the file to download.
+
+        Returns:
+            str: The path to the downloaded file.
+        """
+        endpoint = f"{self.base_url}/files/{file_id}/download"
+        response = self.session.get(endpoint)
+        filename_prefix, extension = os.path.splitext(filename)
+        file = tempfile.NamedTemporaryFile(
+            mode="wb", prefix=f"{filename_prefix}", suffix=extension, delete=False
+        )
+        file.write(response.content)
+        file.close()
+        return file.name
 
     def upload_file(
         self, file_path: str, folder_id: int) -> int | None:
