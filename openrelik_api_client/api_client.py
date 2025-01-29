@@ -129,11 +129,15 @@ class APIClient:
             while chunk := fh.read(chunk_size):
                 resumableChunkNumber += 1
                 params = {
-                    "resumableChunkNumber": str(resumableChunkNumber),
-                    "resumableTotalChunks": str(resumableTotalChunks),
+                    "resumableRelativePath": resumableFilename,
+                    "resumableTotalSize": total_size,
+                    "resumableCurrentChunkSize": chunk_size,
+                    "resumableChunkSize": chunk_size,
+                    "resumableChunkNumber": resumableChunkNumber,
+                    "resumableTotalChunks": resumableTotalChunks,
                     "resumableIdentifier": resumableIdentifier,
                     "resumableFilename": resumableFilename,
-                    "folder_id": str(folder_id),
+                    "folder_id": folder_id
                 }
                 encoder = MultipartEncoder(
                     {"file": (file_path.name, chunk,
