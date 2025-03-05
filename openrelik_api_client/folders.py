@@ -41,11 +41,10 @@ class FoldersAPI:
         response = self.api_client.session.post(endpoint, json=params)
         response.raise_for_status()
         if response.status_code == 201:
-            folder_id = response.json().get('id')
+            folder_id = response.json().get("id")
         return folder_id
 
-    def create_subfolder(
-            self, folder_id: int, display_name: str) -> int | None:
+    def create_subfolder(self, folder_id: int, display_name: str) -> int | None:
         """Create a subfolder within the given folder ID.
 
         Args:
@@ -86,7 +85,7 @@ class FoldersAPI:
 
     def update_folder(
         self, folder_id: int, folder_data: dict[str, Any]
-    ):
+    ) -> dict[str, Any] | None:
         """Updates an existing folder.
 
         Args:
@@ -100,9 +99,24 @@ class FoldersAPI:
             HTTPError: If the API request failed.
         """
         endpoint = f"{self.api_client.base_url}/folders/{folder_id}"
-        response = self.api_client.session.patch(
-            endpoint,
-            json=folder_data
-        )
+        response = self.api_client.session.patch(endpoint, json=folder_data)
         response.raise_for_status()
         return response.json()
+
+    def delete_folder(
+        self, folder_id: int) -> bool:
+        """Deletes an existing folder.
+
+        Args:
+            folder_id: The ID of the folder to update.
+
+        Returns:
+            True if the request was successful.
+
+        Raises:
+            HTTPError: If the API request failed.
+        """
+        endpoint = f"{self.api_client.base_url}/folders/{folder_id}"
+        response = self.api_client.session.delete(endpoint)
+        response.raise_for_status()
+        return response.status_code == 204
