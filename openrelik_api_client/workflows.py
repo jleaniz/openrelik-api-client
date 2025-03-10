@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import json
+from typing import Any
 
 from openrelik_api_client.api_client import APIClient
 
@@ -24,7 +25,8 @@ class WorkflowsAPI:
         self.folders_url = f"{self.api_client.base_url}/folders"
 
     def create_workflow(
-            self, folder_id: int, file_ids: list, template_id: int = None) -> int | None:
+        self, folder_id: int, file_ids: list, template_id: int = None
+    ) -> int | None:
         """Creates a new workflow.
 
         Args:
@@ -40,15 +42,18 @@ class WorkflowsAPI:
         """
         workflow_id = None
         endpoint = f"{self.folders_url}/{folder_id}/workflows/"
-        data = {"folder_id": folder_id,
-                "file_ids": file_ids, "template_id": template_id}
+        data = {
+            "folder_id": folder_id,
+            "file_ids": file_ids,
+            "template_id": template_id,
+        }
         response = self.api_client.session.post(endpoint, json=data)
         response.raise_for_status()
         if response.status_code == 200:
             workflow_id = response.json().get("id")
         return workflow_id
 
-    def get_workflow(self, folder_id: int, workflow_id: int):
+    def get_workflow(self, folder_id: int, workflow_id: int) -> dict[str, Any]:
         """Retrieves a workflow by ID.
 
         Args:
@@ -67,7 +72,9 @@ class WorkflowsAPI:
         if response.status_code == 200:
             return response.json()
 
-    def update_workflow(self, folder_id: int, workflow_id: int, workflow_data: dict):
+    def update_workflow(
+        self, folder_id: int, workflow_id: int, workflow_data: dict
+    ) -> dict[str, Any] | None:
         """Updates an existing workflow.
 
         Args:
@@ -107,7 +114,7 @@ class WorkflowsAPI:
         response.raise_for_status()
         return response.status_code == 204
 
-    def run_workflow(self, folder_id: int, workflow_id: int):
+    def run_workflow(self, folder_id: int, workflow_id: int) -> dict[str, Any] | None:
         """Runs an existing workflow.
 
         Args:
@@ -122,11 +129,10 @@ class WorkflowsAPI:
             HTTPError: If the API request failed.
         """
         workflow = None
-        endpoint = (
-            f"{self.folders_url}/{folder_id}/workflows/{workflow_id}/run/")
+        endpoint = f"{self.folders_url}/{folder_id}/workflows/{workflow_id}/run/"
         workflow = self.get_workflow(folder_id, workflow_id)
-        spec = json.loads(workflow.get('spec_json'))
-        data = {'workflow_spec': spec}
+        spec = json.loads(workflow.get("spec_json"))
+        data = {"workflow_spec": spec}
         response = self.api_client.session.post(endpoint, json=data)
         response.raise_for_status()
         if response.status_code == 200:

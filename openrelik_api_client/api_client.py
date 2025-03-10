@@ -12,14 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import tempfile
-from requests_toolbelt import MultipartEncoder
-from requests.exceptions import RequestException
-import requests
-import os
-from pathlib import Path
-from uuid import uuid4
 import math
+import os
+import tempfile
+from pathlib import Path
+from typing import Any
+from uuid import uuid4
+
+import requests
+from requests.exceptions import RequestException
+from requests_toolbelt import MultipartEncoder
 
 
 class APIClient:
@@ -72,6 +74,13 @@ class APIClient:
         url = f"{self.base_url}{endpoint}"
         return self.session.delete(url, **kwargs)
 
+    def get_config(self) -> dict[str, Any]:
+        """Gets the current OpenRelik configuration."""
+        endpoint = f"{self.base_url}/config/system/"
+        response = self.session.get(endpoint)
+        response.raise_for_status()
+        return response.json()
+
     def download_file(self, file_id: int, filename: str) -> str | None:
         """Downloads a file from OpenRelik.
 
@@ -92,8 +101,7 @@ class APIClient:
         file.close()
         return file.name
 
-    def upload_file(
-        self, file_path: str, folder_id: int) -> int | None:
+    def upload_file(self, file_path: str, folder_id: int) -> int | None:
         """Uploads a file to the server.
 
         Args:
@@ -137,11 +145,10 @@ class APIClient:
                     "resumableTotalChunks": resumableTotalChunks,
                     "resumableIdentifier": resumableIdentifier,
                     "resumableFilename": resumableFilename,
-                    "folder_id": folder_id
+                    "folder_id": folder_id,
                 }
                 encoder = MultipartEncoder(
-                    {"file": (file_path.name, chunk,
-                              "application/octet-stream")}
+                    {"file": (file_path.name, chunk, "application/octet-stream")}
                 )
                 headers = {"Content-Type": encoder.content_type}
                 response = self.session.post(
@@ -151,7 +158,7 @@ class APIClient:
                     params=params,
                 )
             if response and response.status_code == 201:
-                file_id = response.json().get('id')
+                file_id = response.json().get("id")
         return file_id
 
 
@@ -171,7 +178,9 @@ class TokenRefreshSession(requests.Session):
         if api_key:
             self.headers["x-openrelik-refresh-token"] = api_key
 
-    def request(self, method, url, **kwargs):
+    def request(
+        self, method: str, url: str, **kwargs: dict[str, Any]
+    ) -> requests.Response:
         """Intercepts the request to handle token expiration.
 
         Args:
@@ -196,7 +205,7 @@ class TokenRefreshSession(requests.Session):
 
         return response
 
-    def _refresh_token(self):
+    def _refresh_token(self) -> bool:
         """Refreshes the access token using the refresh token."""
         refresh_url = f"{self.api_server_url}/auth/refresh"
         try:
