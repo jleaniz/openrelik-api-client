@@ -15,6 +15,7 @@
 import math
 import os
 import tempfile
+import time
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -114,10 +115,13 @@ class APIClient:
         Raise:
             FileNotFoundError: if file_path is not found.
         """
+        MAX_CHUNK_RETRIES = 10  # Maximum number of retries for chunk upload
+        CHUNK_RETRY_INTERVAL = 0.5  # seconds
+
         file_id = None
         response = None
         endpoint = "/files/upload"
-        chunk_size = 1024000  # 1 MB
+        chunk_size = 10 * 1024 * 1024  # 10 MB
         resumableTotalChunks = 0
         resumableChunkNumber = 0
         resumableIdentifier = uuid4().hex
@@ -136,29 +140,46 @@ class APIClient:
             resumableTotalChunks = math.ceil(total_size / chunk_size)
             while chunk := fh.read(chunk_size):
                 resumableChunkNumber += 1
-                params = {
-                    "resumableRelativePath": resumableFilename,
-                    "resumableTotalSize": total_size,
-                    "resumableCurrentChunkSize": chunk_size,
-                    "resumableChunkSize": chunk_size,
-                    "resumableChunkNumber": resumableChunkNumber,
-                    "resumableTotalChunks": resumableTotalChunks,
-                    "resumableIdentifier": resumableIdentifier,
-                    "resumableFilename": resumableFilename,
-                    "folder_id": folder_id,
-                }
-                encoder = MultipartEncoder(
-                    {"file": (file_path.name, chunk, "application/octet-stream")}
-                )
-                headers = {"Content-Type": encoder.content_type}
-                response = self.session.post(
-                    f"{self.base_url}{endpoint}",
-                    headers=headers,
-                    data=encoder.to_string(),
-                    params=params,
-                )
+                retry_count = 0
+                while retry_count < MAX_CHUNK_RETRIES:
+                    params = {
+                        "resumableRelativePath": resumableFilename,
+                        "resumableTotalSize": total_size,
+                        "resumableCurrentChunkSize": len(chunk),
+                        "resumableChunkSize": chunk_size,
+                        "resumableChunkNumber": resumableChunkNumber,
+                        "resumableTotalChunks": resumableTotalChunks,
+                        "resumableIdentifier": resumableIdentifier,
+                        "resumableFilename": resumableFilename,
+                        "folder_id": folder_id,
+                    }
+                    encoder = MultipartEncoder(
+                        {"file": (file_path.name, chunk, "application/octet-stream")}
+                    )
+                    headers = {"Content-Type": encoder.content_type}
+                    response = self.session.post(
+                        f"{self.base_url}{endpoint}",
+                        headers=headers,
+                        data=encoder.to_string(),
+                        params=params,
+                    )
+                    if response.status_code == 200 or response.status_code == 201:
+                        # Success, move to the next chunk
+                        break
+                    elif response.status_code == 503:
+                        # Server has issue saving the chunk, retry the upload.
+                        retry_count += 1
+                        time.sleep(CHUNK_RETRY_INTERVAL)
+                    elif response.status_code == 429:
+                        # Rate limit exceeded, cancel the upload and raise an error.
+                        raise RuntimeError("Upload failed, maximum retries exceeded")
+                    else:
+                        # Other errors, cancel the upload and raise an error.
+                        raise RuntimeError("Upload failed")
+
             if response and response.status_code == 201:
                 file_id = response.json().get("id")
+
         return file_id
 
 
@@ -178,9 +199,7 @@ class TokenRefreshSession(requests.Session):
         if api_key:
             self.headers["x-openrelik-refresh-token"] = api_key
 
-    def request(
-        self, method: str, url: str, **kwargs: dict[str, Any]
-    ) -> requests.Response:
+    def request(self, method: str, url: str, **kwargs: dict[str, Any]) -> requests.Response:
         """Intercepts the request to handle token expiration.
 
         Args:
