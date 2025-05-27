@@ -15,7 +15,6 @@
 from typing import Any
 
 from openrelik_api_client.api_client import APIClient
-from openrelik_api_client.groups import GroupsAPI
 
 
 class FoldersAPI:
