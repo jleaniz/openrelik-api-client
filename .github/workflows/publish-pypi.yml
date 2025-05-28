@@ -27,13 +27,13 @@ jobs:
 
   publish-to-pypi:
     name: Publish Python 🐍 distribution 📦 to PyPI
-    if: startsWith(github.ref, 'refs/tags/20')  # only publish to PyPI on tag pushes
+    if: startsWith(github.ref, 'refs/tags/')  # only publish to PyPI on tag pushes
     needs:
     - build
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/turbinia
+      url: https://pypi.org/p/openrelik-api-client
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
 
